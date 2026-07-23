@@ -1,6 +1,6 @@
 # leogreenfarm
 AI-powered smart farming website with weather updates, crop recommendations, and agricultural assistance.
-# 🌱 Kisan Mitra - AI Farmer Assistant
+# 🌱 leo - AI Farmer Assistant
 
 Kisan Mitra is an AI-powered smart farming platform that helps farmers make better decisions using technology. It provides weather updates, crop disease detection, irrigation guidance, crop price information, and an AI chatbot—all in one place.
 
@@ -10,8 +10,8 @@ Kisan Mitra is an AI-powered smart farming platform that helps farmers make bett
 - 🌦️ Live Weather Forecast
 - 🌾 Crop Disease Detection
 - 💧 Irrigation Calculator
-- 📈 Crop Price Information
-- 🛒 Marketplace for Farming Products
+
+
 - 📚 Farming Learning Resources
 - 🌍 Multi-language Support (English, Tamil, Hindi)
 - 📱 Mobile-Friendly Responsive Design
