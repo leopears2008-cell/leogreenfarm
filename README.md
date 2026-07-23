@@ -60,7 +60,7 @@ git clone <repository-url>
 
 ## 👨‍💻 Author
 
-**Leo**
+**Leo pears**
 
 ## 📄 License
 
