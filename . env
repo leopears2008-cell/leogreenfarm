@@ -1,0 +1,30 @@
+# --- Claude API (disease detection + Ask Leo chatbot) ---
+ANTHROPIC_API_KEY=sk-ant-...
+
+# --- MySQL database (Prisma) ---
+# Example: mysql://user:password@localhost:3306/leo_db
+DATABASE_URL=mysql://user:password@localhost:3306/leo_db
+
+# --- Auth (NextAuth) ---
+# Generate with: openssl rand -base64 32
+NEXTAUTH_SECRET=replace-with-a-random-32-byte-secret
+NEXTAUTH_URL=http://localhost:3000
+
+# --- Razorpay (payments) ---
+RAZORPAY_KEY_ID=rzp_test_...
+RAZORPAY_KEY_SECRET=...
+
+# --- Cloudinary (product image storage) ---
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+
+# --- Twilio (SMS/WhatsApp order notifications) — optional, logs to console if unset ---
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+# For WhatsApp use the 'whatsapp:+14155238886' sandbox number format
+TWILIO_FROM_NUMBER=
+
+# --- Optional: live mandi prices via data.gov.in Agmarknet ---
+# Get a free key at https://data.gov.in — falls back to mock data if unset
+DATA_GOV_IN_API_KEY=
