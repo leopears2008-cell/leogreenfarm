@@ -1,0 +1,8 @@
+{
+  "name": "leogreenfarm",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-powered smart farming assistant",
+  "license": "MIT",
+  "engines": { "node": ">=18" }
+}
