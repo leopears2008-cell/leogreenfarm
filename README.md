@@ -1,19 +1,71 @@
-# Leo Green Farm
+# leogreenfarm
+AI-powered smart farming website with weather updates, crop recommendations, and agricultural assistance.
+# 🌱 leo - AI Farmer Assistant
 
-AI-powered farming assistant for Indian farmers (English, Tamil, Hindi replies).
+Kisan Mitra is an AI-powered smart farming platform that helps farmers make better decisions using technology. It provides weather updates, crop disease detection, irrigation guidance, crop price information, and an AI chatbot—all in one place.
 
-## Current status
-- Working code: chat assistant UI + `/api/chat` serverless proxy to the Gemini API (not yet verified against a live key).
-- Planned (not built): weather, crop disease detection, irrigation, market prices, accounts, voice, PWA. See `docs/PROJECT_AUDIT.md`.
+## 🚀 Features
 
-## Setup
-1. Copy `.env.example` to `.env` and set `GEMINI_API_KEY` (get one from Google AI Studio). Never commit it.
-2. Deploy to Vercel (or similar) and set `GEMINI_API_KEY` in the project's environment variables.
-3. Local run: `npx vercel dev` (serves `index.html` and `api/chat.js`).
+- 🤖 AI Farming Assistant
+- 🌦️ Live Weather Forecast
+- 🌾 Crop Disease Detection
+- 💧 Irrigation Calculator
 
-## Security notes
-- The API key is read only on the server (`api/chat.js`).
-- Do not put keys in `script.js` or any file served to the browser.
 
-## License
-MIT
+- 📚 Farming Learning Resources
+- 🌍 Multi-language Support (English, Tamil, Hindi)
+- 📱 Mobile-Friendly Responsive Design
+
+## 🛠️ Tech Stack
+
+- HTML
+- CSS
+- JavaScript
+- OpenWeather API
+- AI API (OpenAI/Gemini)
+- Leaflet Maps (Optional)
+
+## 📂 Project Structure
+
+```
+farm-website/
+│── index.html
+│── style.css
+│── script.js
+│── assets/
+│── images/
+│── README.md
+```
+
+## ⚙️ Installation
+
+1. Clone the repository:
+```
+git clone <repository-url>
+```
+
+2. Open the project folder.
+
+3. Launch `index.html` in your browser or use Live Server in VS Code.
+
+## 🎯 Future Improvements
+
+- User Login
+- Farmer Dashboard
+- Voice Assistant
+- Soil Analysis
+- IoT Sensor Integration
+- AI Crop Recommendation
+- Market Price Prediction
+
+## 👨‍💻 Author
+
+**Leo pears**
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+**Helping Farmers with AI for a Better Tomorrow 🌱**

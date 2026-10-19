@@ -1,37 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Leo Green Farm – AI Farming Assistant</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <header class="top">
-    <h1>🌱 Leo Green Farm</h1>
-    <label class="lang">
-      <span class="sr-only">Language</span>
-      <select id="lang">
-        <option value="en">English</option>
-        <option value="ta">தமிழ்</option>
-        <option value="hi">हिन्दी</option>
-      </select>
-    </label>
-  </header>
-
-  <main>
-    <section id="log" class="log" aria-live="polite" aria-label="Conversation">
-      <p class="msg bot">Ask a farming question about crops, irrigation, or weather. For pesticide, fertilizer, or disease advice, please confirm with a local agriculture officer.</p>
-    </section>
-
-    <form id="form" class="form">
-      <label for="q" class="sr-only">Your question</label>
-      <textarea id="q" rows="2" maxlength="2000" placeholder="Type your question…" required></textarea>
-      <button id="send" type="submit">Send</button>
-      <button id="reset" type="button" class="secondary">New chat</button>
-    </form>
-  </main>
-
-  <script src="script.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kisan Mitra - AI Farmer Assistant</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

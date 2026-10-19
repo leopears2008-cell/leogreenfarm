@@ -1,0 +1,10 @@
+{
+  "name": "Kisan Mitra",
+  "description": "An AI-powered farming assistant providing live weather, crop disease detection, irrigation calculations, and voice-enabled expert advice in multiple languages.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
