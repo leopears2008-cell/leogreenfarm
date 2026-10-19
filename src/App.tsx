@@ -19,7 +19,9 @@ import {
   MapPin, 
   RefreshCw,
   Eye,
-  Home
+  Home,
+  Wind,
+  Layers
 } from 'lucide-react';
 import { LanguageProvider, useLanguage } from './LanguageContext';
 import { Language } from './translations';
@@ -31,6 +33,7 @@ import CropPlanner from './components/CropPlanner';
 import MandiMarketWatch from './components/MandiMarketWatch';
 import IrrigationCalc from './components/IrrigationCalc';
 import AIAssistant from './components/AIAssistant';
+import CinematicCropBackdrop from './components/CinematicCropBackdrop';
 
 type ActiveTab = 'overview' | 'weather' | 'health' | 'planner' | 'mandi' | 'irrigation' | 'assistant';
 
@@ -42,6 +45,11 @@ function AppContent() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [activeZone, setActiveZone] = useState('Cauvery Delta (Thanjavur)');
+  
+  // Cinematic crop loop settings
+  const [backdropEnabled, setBackdropEnabled] = useState(true);
+  const [backdropOpacity, setBackdropOpacity] = useState<'subtle' | 'balanced' | 'deep'>('subtle');
+  const [backdropBlend, setBackdropBlend] = useState<'luminosity' | 'overlay' | 'normal'>('luminosity');
 
   // Farm Profile settings state
   const [farmSettings, setFarmSettings] = useState({
@@ -99,9 +107,16 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070D09] text-stone-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-black">
+    <div className="min-h-screen bg-[#070D09] text-stone-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-black relative">
+      {/* Cinematic Looping Backdrop with CSS Blend Mode & Low Opacity */}
+      <CinematicCropBackdrop 
+        enabled={backdropEnabled} 
+        opacityLevel={backdropOpacity} 
+        blendMode={backdropBlend} 
+      />
+
       {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-[#070D09]/85 backdrop-blur-xl border-b border-emerald-500/15">
+      <header className="sticky top-0 z-40 bg-[#070D09]/85 backdrop-blur-xl border-b border-emerald-500/15 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4">
           {/* Logo & Mobile Menu Trigger */}
           <div className="flex items-center gap-3">
@@ -174,6 +189,23 @@ function AppContent() {
                 <option value="hi" className="bg-[#0B130E] text-stone-200">हिंदी</option>
               </select>
             </div>
+
+            {/* Cinematic Swaying Crops Atmosphere Toggle */}
+            <button
+              onClick={() => setBackdropEnabled(!backdropEnabled)}
+              className={`p-2 rounded-xl transition-all relative cursor-pointer border ${
+                backdropEnabled
+                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 shadow-sm shadow-emerald-500/20'
+                  : 'bg-white/5 border-white/10 text-stone-400 hover:text-white'
+              }`}
+              title={backdropEnabled ? 'Cinematic Swaying Crops: Active (Click to toggle off)' : 'Cinematic Swaying Crops: Paused (Click to activate)'}
+              aria-label="Toggle Cinematic Swaying Crops"
+            >
+              <Wind className="w-4 h-4" />
+              {backdropEnabled && (
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              )}
+            </button>
 
             {/* Notifications Trigger */}
             <button
@@ -392,6 +424,56 @@ function AppContent() {
                   onChange={(e) => setFarmSettings({ ...farmSettings, irrigationType: e.target.value })}
                   className="w-full p-2.5 rounded-xl bg-[#121E16] border border-emerald-500/20 text-stone-200 font-sans focus:outline-none focus:border-emerald-400"
                 />
+              </div>
+
+              {/* Atmospheric Background Settings */}
+              <div className="pt-3 border-t border-emerald-500/15 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-white text-xs font-semibold block">Cinematic Swaying Crops Backdrop</label>
+                    <span className="text-[11px] text-stone-400">Atmospheric video loop with CSS blend mode</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setBackdropEnabled(!backdropEnabled)}
+                    className={`px-3 py-1 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer border ${
+                      backdropEnabled 
+                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' 
+                        : 'bg-white/5 text-stone-400 border-white/10'
+                    }`}
+                  >
+                    {backdropEnabled ? 'ENABLED' : 'PAUSED'}
+                  </button>
+                </div>
+
+                {backdropEnabled && (
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <label className="text-stone-400 block mb-1">Backdrop Opacity</label>
+                      <select
+                        value={backdropOpacity}
+                        onChange={(e) => setBackdropOpacity(e.target.value as any)}
+                        className="w-full p-2 rounded-xl bg-[#121E16] border border-emerald-500/20 text-stone-200 text-xs focus:outline-none"
+                      >
+                        <option value="subtle">Subtle (15% Opacity)</option>
+                        <option value="balanced">Balanced (25% Opacity)</option>
+                        <option value="deep">Cinematic (35% Opacity)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-stone-400 block mb-1">CSS Blend Mode</label>
+                      <select
+                        value={backdropBlend}
+                        onChange={(e) => setBackdropBlend(e.target.value as any)}
+                        className="w-full p-2 rounded-xl bg-[#121E16] border border-emerald-500/20 text-stone-200 text-xs focus:outline-none"
+                      >
+                        <option value="luminosity">Luminosity (Moody Forest)</option>
+                        <option value="overlay">Overlay (Sunlit Depth)</option>
+                        <option value="normal">Normal (Soft Dark)</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

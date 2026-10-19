@@ -1,6 +1,6 @@
 {
-  "name": "Kisan Mitra",
-  "description": "An AI-powered farming assistant providing live weather, crop disease detection, irrigation calculations, and voice-enabled expert advice in multiple languages.",
+  "name": "Leo Green Farm",
+  "description": "Intelligent sustainable agricultural intelligence suite tailored for Indian farmers with dedicated Tamil Nadu microclimate forecasting, botanical sensor telemetry, and AI crop health scanning.",
   "requestFramePermissions": [
     "microphone"
   ],
