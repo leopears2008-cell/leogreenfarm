@@ -1,4 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ReferenceLine
+} from "recharts";
 
 export type District = {
   name: string;
@@ -132,6 +143,7 @@ export default function TamilNaduWeather({ onBackToDashboard, showBackHeader }: 
   const [error, setError] = useState("");
   const [filterRainOnly, setFilterRainOnly] = useState(false);
   const [sortBy, setSortBy] = useState<'name' | 'temp-desc' | 'temp-asc' | 'rain-desc'>('name');
+  const [showFeelsLike, setShowFeelsLike] = useState(true);
 
   async function refresh() {
     setLoading(true);
@@ -170,6 +182,30 @@ export default function TamilNaduWeather({ onBackToDashboard, showBackHeader }: 
   const hottest = data.length > 0 ? [...data].sort((a, b) => b.temperature_2m - a.temperature_2m)[0] : null;
   const coolest = data.length > 0 ? [...data].sort((a, b) => a.temperature_2m - b.temperature_2m)[0] : null;
   const rainingCount = data.filter(d => d.rain > 0 || [61, 63, 65, 80, 81, 82, 95].includes(d.weather_code)).length;
+
+  // Chart data formatted for recharts line chart
+  const chartData = useMemo(() => {
+    return visible.map(d => ({
+      name: d.name,
+      nameTa: d.nameTa || '',
+      temp: Math.round(d.temperature_2m * 10) / 10,
+      feelsLike: Math.round(d.apparent_temperature * 10) / 10,
+      humidity: d.relative_humidity_2m,
+      rain: d.rain,
+      condition: description(d.weather_code),
+    }));
+  }, [visible]);
+
+  const { filteredAvgTemp, filteredMinTemp, filteredMaxTemp } = useMemo(() => {
+    if (chartData.length === 0) return { filteredAvgTemp: 0, filteredMinTemp: 0, filteredMaxTemp: 0 };
+    const temps = chartData.map(d => d.temp);
+    const sum = temps.reduce((a, b) => a + b, 0);
+    return {
+      filteredAvgTemp: Math.round((sum / temps.length) * 10) / 10,
+      filteredMinTemp: Math.min(...temps),
+      filteredMaxTemp: Math.max(...temps),
+    };
+  }, [chartData]);
 
   return (
     <main style={{
@@ -415,6 +451,218 @@ export default function TamilNaduWeather({ onBackToDashboard, showBackHeader }: 
             Updated: {new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }).format(new Date())} IST
           </span>
         </div>
+      )}
+
+      {/* Temperature Distribution Line Chart (recharts) across currently filtered districts */}
+      {!loading && !error && visible.length > 0 && (
+        <section style={{
+          marginBottom: 24,
+          background: "#ffffff",
+          borderRadius: 20,
+          padding: "20px 22px",
+          border: "1px solid #e2e8f0",
+          boxShadow: "0 4px 16px rgba(15, 23, 42, 0.05)",
+          overflow: "hidden"
+        }}>
+          {/* Header & Controls */}
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            flexWrap: "wrap",
+            gap: 14,
+            marginBottom: 16
+          }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                <span style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 28,
+                  height: 28,
+                  borderRadius: 8,
+                  background: "#ecfdf5",
+                  color: "#059669",
+                  fontSize: 14
+                }}>
+                  📈
+                </span>
+                <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#0f172a" }}>
+                  Temperature Distribution Curve
+                </h3>
+                <span style={{
+                  fontSize: 11,
+                  fontFamily: "monospace",
+                  fontWeight: 600,
+                  padding: "2px 8px",
+                  borderRadius: 999,
+                  background: "#f1f5f9",
+                  color: "#475569"
+                }}>
+                  {visible.length} Districts Plotted
+                </span>
+              </div>
+              <p style={{ margin: 0, fontSize: 12, color: "#64748b" }}>
+                Real-time thermal comparison across currently filtered Tamil Nadu districts with average threshold
+              </p>
+            </div>
+
+            {/* Quick Metrics Badges & Toggle */}
+            <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+              <div style={{
+                padding: "6px 12px",
+                borderRadius: 10,
+                background: "#f8fafc",
+                border: "1px solid #e2e8f0",
+                fontSize: 12,
+                color: "#334155"
+              }}>
+                <span style={{ color: "#64748b", fontSize: 11, marginRight: 4 }}>Avg:</span>
+                <strong style={{ color: "#059669", fontFamily: "monospace" }}>{filteredAvgTemp}°C</strong>
+              </div>
+
+              <div style={{
+                padding: "6px 12px",
+                borderRadius: 10,
+                background: "#f8fafc",
+                border: "1px solid #e2e8f0",
+                fontSize: 12,
+                color: "#334155"
+              }}>
+                <span style={{ color: "#64748b", fontSize: 11, marginRight: 4 }}>Range:</span>
+                <strong style={{ color: "#0284c7", fontFamily: "monospace" }}>{filteredMinTemp}°C – {filteredMaxTemp}°C</strong>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowFeelsLike(!showFeelsLike)}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: 10,
+                  border: showFeelsLike ? "1px solid #38bdf8" : "1px solid #cbd5e1",
+                  background: showFeelsLike ? "#f0f9ff" : "#ffffff",
+                  color: showFeelsLike ? "#0284c7" : "#64748b",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6
+                }}
+              >
+                <span style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: showFeelsLike ? "#0284c7" : "#94a3b8"
+                }} />
+                {showFeelsLike ? "Feels Like Active" : "Show Feels Like"}
+              </button>
+            </div>
+          </div>
+
+          {/* Recharts LineChart */}
+          <div style={{ width: "100%", height: 280, marginTop: 8 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 12, right: 16, left: -10, bottom: 25 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis 
+                  dataKey="name" 
+                  angle={-40} 
+                  textAnchor="end" 
+                  interval={visible.length > 25 ? 1 : 0}
+                  tick={{ fontSize: 11, fill: "#64748b" }}
+                  height={55}
+                />
+                <YAxis 
+                  unit="°C" 
+                  domain={['dataMin - 2', 'dataMax + 2']} 
+                  tick={{ fontSize: 11, fill: "#64748b" }}
+                  width={42}
+                />
+                <Tooltip 
+                  content={({ active, payload }: any) => {
+                    if (active && payload && payload.length) {
+                      const item = payload[0].payload;
+                      return (
+                        <div style={{
+                          background: "#0f172a",
+                          color: "#f8fafc",
+                          padding: "10px 14px",
+                          borderRadius: "12px",
+                          border: "1px solid rgba(255, 255, 255, 0.15)",
+                          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3)",
+                          fontSize: "12px",
+                          minWidth: "160px"
+                        }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                            <strong style={{ fontSize: "14px", color: "#34d399" }}>{item.name}</strong>
+                            {item.nameTa && <span style={{ fontSize: "11px", color: "#a7f3d0" }}>{item.nameTa}</span>}
+                          </div>
+                          <div style={{ fontSize: "11px", color: "#94a3b8", marginBottom: "8px" }}>{item.condition}</div>
+                          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", margin: "3px 0" }}>
+                            <span style={{ color: "#cbd5e1" }}>Ambient Temp:</span>
+                            <strong style={{ color: "#34d399", fontFamily: "monospace", fontSize: "13px" }}>{item.temp}°C</strong>
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", margin: "3px 0" }}>
+                            <span style={{ color: "#cbd5e1" }}>Feels Like:</span>
+                            <strong style={{ color: "#38bdf8", fontFamily: "monospace", fontSize: "13px" }}>{item.feelsLike}°C</strong>
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", margin: "3px 0" }}>
+                            <span style={{ color: "#94a3b8" }}>Humidity:</span>
+                            <span style={{ color: "#e2e8f0" }}>{item.humidity}%</span>
+                          </div>
+                          {item.rain > 0 && (
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", margin: "3px 0" }}>
+                              <span style={{ color: "#60a5fa" }}>Rainfall:</span>
+                              <span style={{ color: "#93c5fd", fontWeight: 600 }}>{item.rain} mm</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }} 
+                />
+                <Legend 
+                  verticalAlign="top" 
+                  align="right"
+                  height={28}
+                  wrapperStyle={{ fontSize: 12, paddingBottom: 6 }}
+                />
+                <ReferenceLine 
+                  y={filteredAvgTemp} 
+                  stroke="#10b981" 
+                  strokeDasharray="4 4" 
+                  strokeWidth={1.5}
+                  label={{ value: `Avg ${filteredAvgTemp}°C`, position: 'insideTopLeft', fill: '#059669', fontSize: 11, fontWeight: 600 }} 
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="temp" 
+                  name="Ambient Temp (°C)" 
+                  stroke="#059669" 
+                  strokeWidth={2.5} 
+                  dot={{ r: visible.length > 25 ? 2.5 : 3.5, fill: "#059669" }}
+                  activeDot={{ r: 6, fill: "#059669", stroke: "#ffffff", strokeWidth: 2 }}
+                />
+                {showFeelsLike && (
+                  <Line 
+                    type="monotone" 
+                    dataKey="feelsLike" 
+                    name="Feels Like (°C)" 
+                    stroke="#0284c7" 
+                    strokeWidth={1.8} 
+                    strokeDasharray="4 4"
+                    dot={{ r: visible.length > 25 ? 2 : 3, fill: "#0284c7" }}
+                    activeDot={{ r: 5, fill: "#0284c7", stroke: "#ffffff", strokeWidth: 2 }}
+                  />
+                )}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
       )}
 
       {/* 38 Districts Grid */}
