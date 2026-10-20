@@ -15,7 +15,8 @@ import {
   MapPin, 
   Compass, 
   Bot, 
-  Globe 
+  Globe,
+  ArrowDown
 } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 import { Language } from '../translations';
@@ -111,186 +112,217 @@ export default function LandingPage({ onOpenDashboard }: LandingPageProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#070D09] text-stone-100 selection:bg-emerald-500 selection:text-black">
-      {/* Editorial Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#070D09]/80 backdrop-blur-xl border-b border-emerald-500/15">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center text-[#070D09] shadow-lg shadow-emerald-500/20">
-              <Leaf className="w-6 h-6 stroke-[2.2]" />
-            </div>
-            <div>
-              <span className="text-xl font-bold tracking-tight text-white font-sans flex items-center gap-2">
-                Leo Green Farm
-                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                  Agri-SaaS
+    <div className="min-h-screen bg-[#070D09] text-stone-100 selection:bg-emerald-500 selection:text-black relative">
+      {/* Fixed Background Photo that covers the entire website */}
+      <div className="fixed inset-0 -z-30 pointer-events-none overflow-hidden select-none" aria-hidden="true">
+        <img
+          src="/assets/aistudio/67906878b871ccd8c7db2d2dc66d5780_01546f3d.png"
+          alt="Leo Green Farm Agricultural Aerial Landscape"
+          className="w-full h-full object-cover scale-[1.24] object-center brightness-[0.38] contrast-[1.05] saturate-[1.18]"
+        />
+        {/* Ambient Dark Forest Gradient Overlays for High Legibility */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#070D09]/50 via-[#070D09]/82 to-[#070D09]/95" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_25%,rgba(16,185,129,0.06)_0%,transparent_70%)]" />
+      </div>
+
+      {/* Modern Floating Pill Navigation Bar */}
+      <header className="fixed top-4 sm:top-6 left-0 right-0 z-50 px-3 sm:px-6 pointer-events-none">
+        <div className="max-w-6xl mx-auto">
+          <nav className="pointer-events-auto rounded-full bg-[#070D09]/85 sm:bg-[#070D09]/75 backdrop-blur-2xl border border-white/15 px-3.5 sm:px-6 py-2.5 sm:py-3 shadow-2xl shadow-black/80 flex items-center justify-between gap-3">
+            {/* Brand Logo & Identifier */}
+            <a href="#" className="flex items-center gap-2.5 text-white group cursor-pointer shrink-0">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-[#070D09] shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+                <Leaf className="w-4 h-4 stroke-[2.4]" />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold tracking-tight text-sm sm:text-base text-white font-sans">
+                  CALESCENCE
                 </span>
-              </span>
-              <p className="text-[11px] text-stone-400 font-mono hidden sm:block">
-                Sustainable Intelligence · Tamil Nadu & Pan-India
-              </p>
-            </div>
-          </div>
+                <span className="hidden sm:inline-block text-[9px] uppercase font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  Agri-Ops
+                </span>
+              </div>
+            </a>
 
-          <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-stone-300">
-            <a href="#about" className="hover:text-emerald-400 transition-colors">
-              {language === 'ta' ? 'அறிமுகம்' : language === 'hi' ? 'परिचय' : 'About'}
-            </a>
-            <a href="#zones" className="hover:text-emerald-400 transition-colors">
-              {language === 'ta' ? 'வேளாண் மண்டலங்கள்' : language === 'hi' ? 'कृषि क्षेत्र' : 'Agro-Zones'}
-            </a>
-            <a href="#features" className="hover:text-emerald-400 transition-colors">
-              {t('features')}
-            </a>
-            <a href="#preview" className="hover:text-emerald-400 transition-colors">
-              {language === 'ta' ? 'டாஷ்போர்டு முன்னோட்டம்' : language === 'hi' ? 'डैशबोर्ड' : 'Live Dashboard'}
-            </a>
-            <a href="#faq" className="hover:text-emerald-400 transition-colors">
-              FAQ
-            </a>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Language Switcher */}
-            <div className="flex items-center gap-1.5 bg-emerald-950/70 border border-emerald-500/25 rounded-xl px-2.5 py-1.5 text-xs text-stone-200">
-              <Globe className="w-3.5 h-3.5 text-emerald-400" />
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as Language)}
-                className="bg-transparent border-none text-xs font-medium cursor-pointer outline-none text-emerald-300 focus:ring-0"
+            {/* Navigation Anchor Links */}
+            <div className="hidden md:flex items-center gap-6 lg:gap-8 text-xs font-semibold tracking-wider uppercase text-stone-300">
+              <button 
+                onClick={() => onOpenDashboard('tnweather')}
+                className="hover:text-cyan-300 transition-colors cursor-pointer flex items-center gap-1.5 text-cyan-400 font-bold uppercase tracking-wider text-xs"
               >
-                <option value="en" className="bg-[#0B130E] text-stone-200">English</option>
-                <option value="ta" className="bg-[#0B130E] text-stone-200">தமிழ்</option>
-                <option value="hi" className="bg-[#0B130E] text-stone-200">हिंदी</option>
-              </select>
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                <span>{language === 'ta' ? '38 மாவட்ட வானிலை' : 'TN 38 Weather'}</span>
+              </button>
+              <a href="#features" className="hover:text-emerald-400 transition-colors">
+                {language === 'ta' ? 'பயன்பாடுகள்' : language === 'hi' ? 'उपयोग' : 'Use Cases'}
+              </a>
+              <a href="#zones" className="hover:text-emerald-400 transition-colors">
+                {language === 'ta' ? 'மண்டலங்கள்' : language === 'hi' ? 'क्षेत्र' : 'Agro-Zones'}
+              </a>
+              <a href="#about" className="hover:text-emerald-400 transition-colors">
+                {language === 'ta' ? 'அறிமுகம்' : language === 'hi' ? 'परिचय' : 'About'}
+              </a>
+              <a href="#preview" className="hover:text-emerald-400 transition-colors">
+                {language === 'ta' ? 'டாஷ்போர்டு' : language === 'hi' ? 'डैशबोर्ड' : 'Live Preview'}
+              </a>
+              <a href="#faq" className="hover:text-emerald-400 transition-colors">
+                FAQ
+              </a>
             </div>
 
-            {/* Launch Dashboard Button */}
-            <button
-              onClick={() => onOpenDashboard()}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-[#070D09] font-semibold text-sm shadow-lg shadow-emerald-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
-            >
-              <span>{t('launchDashboard')}</span>
-              <ArrowRight className="w-4 h-4 stroke-[2.5]" />
-            </button>
-          </div>
-        </div>
-      </nav>
+            {/* Language Toggle & Primary CTA Button */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              {/* Language Switcher */}
+              <div className="flex items-center gap-1.5 bg-black/40 border border-white/15 rounded-full px-2.5 py-1 text-xs text-stone-200">
+                <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value as Language)}
+                  className="bg-transparent border-none text-xs font-medium cursor-pointer outline-none text-emerald-300 focus:ring-0"
+                >
+                  <option value="en" className="bg-[#0B130E] text-stone-200">English</option>
+                  <option value="ta" className="bg-[#0B130E] text-stone-200">தமிழ்</option>
+                  <option value="hi" className="bg-[#0B130E] text-stone-200">हिंदी</option>
+                </select>
+              </div>
 
-      {/* Cinematic Hero Section */}
-      <section className="relative pt-32 pb-24 lg:pt-40 lg:pb-36 overflow-hidden">
-        {/* Background Landscape with warm sunrise overlay */}
+              {/* Get In Touch / Launch Button */}
+              <button
+                onClick={() => onOpenDashboard()}
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white hover:bg-emerald-300 text-[#070D09] font-bold text-xs uppercase tracking-wider transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer shadow-lg shadow-white/10"
+              >
+                <span>{language === 'ta' ? 'தொடங்குக ↗' : language === 'hi' ? 'प्रारंभ करें ↗' : 'Get In Touch ↗'}</span>
+              </button>
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      {/* Full-Viewport Front Page Hero Section */}
+      <section className="min-h-screen relative flex flex-col justify-between pt-24 sm:pt-28 pb-8 sm:pb-12 px-4 sm:px-8 lg:px-14 overflow-hidden border-b border-emerald-500/20">
+        {/* Full Screen Cinematic Agricultural Landscape Image */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <img
-            src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2000&q=80"
-            alt="Cinematic agricultural landscape at golden hour"
-            className="w-full h-full object-cover object-center brightness-[0.45] saturate-[1.1] scale-105 transform duration-1000"
+            src="/assets/aistudio/67906878b871ccd8c7db2d2dc66d5780_01546f3d.png"
+            alt="Cinematic aerial view of swaying crops and agricultural landscape"
+            className="w-full h-full object-cover scale-[1.24] object-center brightness-[0.82] contrast-[1.08] saturate-[1.12]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#070D09] via-[#070D09]/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#070D09]/90 via-[#070D09]/40 to-transparent" />
+          {/* Subtle gradient vignette to keep text crisp while retaining stunning golden hour warmth */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#070D09] via-transparent to-black/40" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#070D09]/80 via-[#070D09]/25 to-transparent" />
           
-          {/* Subtle Warm Sunrise Ambient Glow */}
-          <div className="absolute -top-32 left-1/3 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+          {/* Warm Solar Glow Highlight */}
+          <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-amber-400/15 rounded-full blur-3xl pointer-events-none" />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="max-w-3xl">
-            {/* Eyebrow */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs font-mono uppercase tracking-widest mb-6 backdrop-blur-md"
-            >
+        {/* Middle-Left: Solar Radiation Intelligence Caption Card */}
+        <div className="max-w-7xl mx-auto w-full pt-16 sm:pt-20">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-md backdrop-blur-md bg-[#070D09]/60 border border-white/20 rounded-2xl p-4 sm:p-5 text-white/95 shadow-2xl shadow-black/50"
+          >
+            <div className="flex items-center gap-2 mb-1.5 text-emerald-400 font-mono text-[11px] uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>{t('heroEyebrow')}</span>
-            </motion.div>
-
-            {/* Headline */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.08] mb-6 font-sans"
-            >
-              {t('heroHeadline')}
-            </motion.h1>
-
-            {/* Subtitle */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg sm:text-xl text-stone-300 leading-relaxed font-normal mb-10 max-w-2xl"
-            >
+              <span>Solar & Thermal Analytics</span>
+            </div>
+            <p className="text-xs sm:text-sm leading-relaxed text-stone-200">
               {t('heroSubheadline')}
-            </motion.p>
+            </p>
+          </motion.div>
+        </div>
 
-            {/* CTA Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-wrap items-center gap-4"
-            >
-              <button
-                onClick={() => onOpenDashboard('overview')}
-                className="inline-flex items-center gap-3 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 hover:from-emerald-300 hover:to-emerald-500 text-[#070D09] font-bold text-base shadow-xl shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+        {/* Lower Hero Section: Headline & Action Triggers */}
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-8">
+            {/* Bottom-Left Massive Editorial Headline */}
+            <div className="max-w-3xl">
+              <motion.h1
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.1 }}
+                className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.08] mb-6 font-sans drop-shadow-lg"
               >
-                <span>{t('exploreFarm')}</span>
-                <ArrowRight className="w-5 h-5 stroke-[2.5]" />
-              </button>
+                {t('heroHeadline')}
+              </motion.h1>
 
-              <button
-                onClick={() => onOpenDashboard('assistant')}
-                className="inline-flex items-center gap-3 px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-base backdrop-blur-md transition-all cursor-pointer hover:border-emerald-400/50"
+              {/* Action Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="flex flex-wrap items-center gap-3 sm:gap-4"
               >
-                <Bot className="w-5 h-5 text-emerald-400" />
-                <span>{t('askLeoAI')}</span>
-              </button>
+                <button
+                  onClick={() => onOpenDashboard('overview')}
+                  className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-white hover:bg-emerald-300 text-[#070D09] font-bold text-sm tracking-wide shadow-xl shadow-black/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                >
+                  <span>{t('launchDashboard')}</span>
+                  <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+                </button>
 
-              <button
-                onClick={() => onOpenDashboard('health')}
-                className="inline-flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-emerald-950/40 hover:bg-emerald-900/40 border border-emerald-500/25 text-emerald-300 text-sm font-medium backdrop-blur-md transition-all cursor-pointer"
-              >
-                <ScanLine className="w-4 h-4" />
-                <span>{language === 'ta' ? 'நோய் கண்டறிதல்' : language === 'hi' ? 'रोग जांचें' : 'Scan Plant Photo'}</span>
-              </button>
-            </motion.div>
+                <button
+                  onClick={() => onOpenDashboard('health')}
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#070D09]/70 hover:bg-[#070D09]/90 border border-white/25 text-white font-semibold text-sm backdrop-blur-md transition-all cursor-pointer hover:border-emerald-400/50"
+                >
+                  <ScanLine className="w-4 h-4 text-emerald-400" />
+                  <span>{language === 'ta' ? 'நோய் கண்டறிதல்' : language === 'hi' ? 'रोग जांचें' : 'Scan Plant Foliage'}</span>
+                </button>
 
-            {/* Live Status Indicators (Genuine telemetry) */}
+                <button
+                  onClick={() => onOpenDashboard('weather')}
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-emerald-950/50 hover:bg-emerald-900/50 border border-emerald-500/30 text-emerald-300 font-semibold text-sm backdrop-blur-md transition-all cursor-pointer"
+                >
+                  <CloudSun className="w-4 h-4 text-amber-300" />
+                  <span>{language === 'ta' ? 'டெல்டா வானிலை' : language === 'hi' ? 'मौसम पूर्वानुमान' : 'Microclimate Radar'}</span>
+                </button>
+              </motion.div>
+            </div>
+
+            {/* Bottom-Right "EXPLORE USE CASES ↓" */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="mt-14 pt-8 border-t border-emerald-500/20 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono"
+              transition={{ duration: 0.7, delay: 0.3 }}
+              className="flex flex-col items-start lg:items-end justify-end"
             >
-              <div>
-                <span className="text-stone-400 block mb-0.5">Primary Zone</span>
-                <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5" /> Cauvery Delta
-                </span>
-              </div>
-              <div>
-                <span className="text-stone-400 block mb-0.5">Sensor Telemetry</span>
-                <span className="text-cyan-400 font-semibold">94% Foliage Hydration</span>
-              </div>
-              <div>
-                <span className="text-stone-400 block mb-0.5">Multilingual AI</span>
-                <span className="text-amber-400 font-semibold">Tamil · English · Hindi</span>
-              </div>
-              <div>
-                <span className="text-stone-400 block mb-0.5">Mandi Regulated</span>
-                <span className="text-white font-semibold">APMC Verified Rates</span>
-              </div>
+              <a
+                href="#features"
+                className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono uppercase tracking-widest text-stone-200 hover:text-emerald-400 transition-colors group cursor-pointer bg-[#070D09]/60 px-4 py-2 rounded-full border border-white/15 backdrop-blur-md"
+              >
+                <span>{t('heroExploreUseCases')}</span>
+                <ArrowDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+              </a>
             </motion.div>
+          </div>
+
+          {/* Realtime Bio-Telemetry Strip */}
+          <div className="pt-6 border-t border-white/15 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono backdrop-blur-sm bg-black/20 p-3 rounded-2xl">
+            <div>
+              <span className="text-stone-400 block text-[10px] uppercase">Agro Node</span>
+              <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5" /> Cauvery Delta Zone
+              </span>
+            </div>
+            <div>
+              <span className="text-stone-400 block text-[10px] uppercase">Telemetry</span>
+              <span className="text-cyan-400 font-semibold">94% Foliage Transpiration</span>
+            </div>
+            <div>
+              <span className="text-stone-400 block text-[10px] uppercase">Microclimate</span>
+              <span className="text-amber-400 font-semibold">29.4°C · 76% Humidity</span>
+            </div>
+            <div>
+              <span className="text-stone-400 block text-[10px] uppercase">Mandi APMC</span>
+              <span className="text-white font-semibold">₹2,380 / qtl Samba Paddy</span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-20 border-t border-emerald-500/15 bg-[#0B130E]/70 relative">
+      <section id="about" className="py-20 border-t border-emerald-500/15 backdrop-blur-xl bg-[#0B130E]/75 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-5 space-y-6">
@@ -328,7 +360,7 @@ export default function LandingPage({ onOpenDashboard }: LandingPageProps) {
                 <img
                   src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1200&q=80"
                   alt="Farmer examining healthy crop field"
-                  className="w-full h-80 sm:h-96 object-cover object-center opacity-80"
+                  className="w-full h-80 sm:h-96 object-cover object-center opacity-85"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0B130E] via-transparent to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-[#0B130E]/85 backdrop-blur-md border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -351,14 +383,14 @@ export default function LandingPage({ onOpenDashboard }: LandingPageProps) {
       </section>
 
       {/* Agro-Climatic Zones of Tamil Nadu */}
-      <section id="zones" className="py-20 border-t border-emerald-500/15">
+      <section id="zones" className="py-20 border-t border-emerald-500/15 backdrop-blur-lg bg-[#070D09]/65">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-xs font-mono uppercase tracking-widest text-emerald-400 block mb-2">Regional Focus</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
               {language === 'ta' ? 'தமிழக வேளாண்-தட்பவெப்ப மண்டலங்கள்' : language === 'hi' ? 'तमिलनाडु के कृषि-जलवायु क्षेत्र' : 'Tamil Nadu Agro-Climatic Zones'}
             </h2>
-            <p className="text-stone-400 text-sm sm:text-base mt-3">
+            <p className="text-stone-300 text-sm sm:text-base mt-3">
               {language === 'ta'
                 ? 'உங்கள் பகுதிக்கான மண் வகை, பயிர்கள் மற்றும் நீர்த் தேவைகளின் அடிப்படையில் துல்லியமான திட்டமிடல்.'
                 : 'Customized decision support engineered specifically for the soil characteristics and river basins of Tamil Nadu.'}
@@ -369,7 +401,7 @@ export default function LandingPage({ onOpenDashboard }: LandingPageProps) {
             {agroZones.map((zone, idx) => (
               <div 
                 key={idx} 
-                className="p-6 rounded-3xl bg-[#0B130E]/80 border border-emerald-500/20 hover:border-emerald-500/40 transition-all duration-300 space-y-4 hover:-translate-y-1"
+                className="p-6 rounded-3xl bg-[#0B130E]/85 border border-emerald-500/20 hover:border-emerald-500/40 backdrop-blur-md transition-all duration-300 space-y-4 hover:-translate-y-1 shadow-xl"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -409,14 +441,14 @@ export default function LandingPage({ onOpenDashboard }: LandingPageProps) {
       </section>
 
       {/* Feature Highlights Grid */}
-      <section id="features" className="py-20 border-t border-emerald-500/15 bg-[#0B130E]/40">
+      <section id="features" className="py-20 border-t border-emerald-500/15 backdrop-blur-xl bg-[#0B130E]/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-mono uppercase tracking-widest text-emerald-400 block mb-2">Core Capabilities</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
               {language === 'ta' ? 'விவசாயிகளுக்கான நவீன சிறப்பம்சங்கள்' : language === 'hi' ? 'किसानों के लिए प्रमुख सुविधाएं' : 'Engineered for Practical Agriculture'}
             </h2>
-            <p className="text-stone-400 text-sm sm:text-base mt-3">
+            <p className="text-stone-300 text-sm sm:text-base mt-3">
               {language === 'ta' ? 'அறிவியல் பூர்வமான அணுகுமுறை, எளிமையான பயன்பாடு.' : 'Clear tools that help you monitor, diagnose, irrigate, and sell with complete confidence.'}
             </p>
           </div>
@@ -427,7 +459,7 @@ export default function LandingPage({ onOpenDashboard }: LandingPageProps) {
               return (
                 <div
                   key={idx}
-                  className="p-6 rounded-3xl bg-gradient-to-b from-[#121E16]/80 to-[#0B130E]/90 border border-emerald-500/20 hover:border-emerald-400/50 transition-all duration-300 group hover:-translate-y-1 shadow-lg"
+                  className="p-6 rounded-3xl bg-gradient-to-b from-[#121E16]/85 to-[#0B130E]/90 border border-emerald-500/20 hover:border-emerald-400/50 backdrop-blur-md transition-all duration-300 group hover:-translate-y-1 shadow-lg"
                 >
                   <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-5 group-hover:scale-110 group-hover:bg-emerald-500/25 transition-all">
                     <IconComp className="w-6 h-6 stroke-[2]" />
@@ -446,8 +478,7 @@ export default function LandingPage({ onOpenDashboard }: LandingPageProps) {
       </section>
 
       {/* Interactive Dashboard Preview Teaser */}
-      <section id="preview" className="py-24 border-t border-emerald-500/15 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-950/20 to-transparent pointer-events-none" />
+      <section id="preview" className="py-24 border-t border-emerald-500/15 relative overflow-hidden backdrop-blur-lg bg-[#070D09]/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div>
@@ -469,15 +500,13 @@ export default function LandingPage({ onOpenDashboard }: LandingPageProps) {
           </div>
 
           {/* Interactive Mock Preview Frame */}
-          <div className="rounded-3xl border border-emerald-500/30 bg-[#0B130E] p-4 sm:p-6 shadow-2xl relative group overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-t from-[#070D09] via-transparent to-transparent z-10 pointer-events-none" />
-            
+          <div className="rounded-3xl border border-emerald-500/30 bg-[#0B130E]/90 backdrop-blur-xl p-4 sm:p-6 shadow-2xl relative group overflow-hidden">
             <div className="flex items-center justify-between pb-4 mb-4 border-b border-emerald-500/15">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-red-500/80" />
                 <span className="w-3 h-3 rounded-full bg-amber-500/80" />
                 <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                <span className="ml-2 text-xs font-mono text-stone-400">leo-green-farm.app · cauvery-delta-node</span>
+                <span className="ml-2 text-xs font-mono text-stone-400">calescence.leo-green-farm.app · cauvery-delta-node</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
@@ -558,7 +587,7 @@ export default function LandingPage({ onOpenDashboard }: LandingPageProps) {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-20 border-t border-emerald-500/15 bg-[#0B130E]/60">
+      <section id="faq" className="py-20 border-t border-emerald-500/15 backdrop-blur-xl bg-[#0B130E]/75">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="text-xs font-mono uppercase tracking-widest text-emerald-400 block mb-2">FAQ</span>
@@ -573,7 +602,7 @@ export default function LandingPage({ onOpenDashboard }: LandingPageProps) {
               return (
                 <div
                   key={idx}
-                  className="rounded-2xl bg-[#121E16]/80 border border-emerald-500/20 overflow-hidden transition-all"
+                  className="rounded-2xl bg-[#121E16]/85 border border-emerald-500/20 overflow-hidden transition-all shadow-md"
                 >
                   <button
                     onClick={() => setOpenFaq(isOpen ? null : idx)}
@@ -599,7 +628,7 @@ export default function LandingPage({ onOpenDashboard }: LandingPageProps) {
       </section>
 
       {/* Final Call to Action */}
-      <section className="py-20 border-t border-emerald-500/15 relative overflow-hidden bg-gradient-to-b from-[#0B130E] to-[#070D09]">
+      <section className="py-20 border-t border-emerald-500/15 relative overflow-hidden backdrop-blur-2xl bg-gradient-to-b from-[#0B130E]/80 to-[#070D09]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="w-16 h-16 rounded-3xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 mx-auto mb-6 shadow-xl shadow-emerald-500/20">
             <Leaf className="w-8 h-8" />
@@ -615,14 +644,14 @@ export default function LandingPage({ onOpenDashboard }: LandingPageProps) {
           <div className="flex flex-wrap items-center justify-center gap-4">
             <button
               onClick={() => onOpenDashboard('overview')}
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 hover:from-emerald-300 hover:to-emerald-500 text-[#070D09] font-bold text-base shadow-2xl shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white hover:bg-emerald-300 text-[#070D09] font-bold text-base shadow-2xl shadow-black/50 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
             >
               <span>{t('launchDashboard')}</span>
               <ArrowRight className="w-5 h-5 stroke-[2.5]" />
             </button>
             <button
               onClick={() => onOpenDashboard('assistant')}
-              className="inline-flex items-center gap-2 px-6 py-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-base backdrop-blur-md transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 py-4 rounded-full bg-black/40 hover:bg-black/60 border border-white/20 text-white font-semibold text-base backdrop-blur-md transition-all cursor-pointer"
             >
               <Bot className="w-5 h-5 text-emerald-400" />
               <span>{t('askLeoAI')}</span>
@@ -632,13 +661,13 @@ export default function LandingPage({ onOpenDashboard }: LandingPageProps) {
       </section>
 
       {/* Editorial Footer */}
-      <footer className="border-t border-emerald-500/20 bg-[#070D09] py-12 text-xs text-stone-400">
+      <footer className="border-t border-emerald-500/20 bg-[#070D09]/90 backdrop-blur-xl py-12 text-xs text-stone-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-emerald-500/10">
             <div className="space-y-3 md:col-span-1">
               <div className="flex items-center gap-2 text-white font-bold text-base">
                 <Leaf className="w-5 h-5 text-emerald-400" />
-                <span>Leo Green Farm</span>
+                <span>CALESCENCE · Leo Green Farm</span>
               </div>
               <p className="text-stone-400 leading-relaxed">
                 Intelligent, sustainable, farmer-first agriculture platform tailored for Tamil Nadu and Indian farming communities.
@@ -675,10 +704,10 @@ export default function LandingPage({ onOpenDashboard }: LandingPageProps) {
           </div>
 
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p>© {new Date().getFullYear()} Leo Green Farm. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} CALESCENCE · Leo Green Farm. All rights reserved.</p>
             <div className="flex items-center gap-6">
               <span>Thanjavur · Madurai · Coimbatore</span>
-              <span className="text-emerald-400">Zero Slop · High Precision</span>
+              <span className="text-emerald-400">Zero Slop · Precision Agriculture</span>
             </div>
           </div>
         </div>

@@ -131,6 +131,16 @@ export default function CinematicCropBackdrop({
       className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none"
       aria-hidden="true"
     >
+      {/* Base agricultural landscape photo covering website */}
+      <img
+        src="/assets/aistudio/67906878b871ccd8c7db2d2dc66d5780_01546f3d.png"
+        alt="Agricultural Aerial Landscape"
+        style={{ mixBlendMode: blendMode }}
+        className={`absolute inset-0 w-full h-full object-cover scale-[1.22] object-center transition-opacity duration-1000 ${
+          opacityLevel === 'subtle' ? 'opacity-20' : opacityLevel === 'balanced' ? 'opacity-35' : 'opacity-50'
+        }`}
+      />
+
       {/* Cinematic HTML5 video of swaying crops in the breeze */}
       {!videoError && (
         <video

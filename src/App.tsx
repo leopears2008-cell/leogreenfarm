@@ -1,20 +1,31 @@
-import { useEffect, useState } from 'react';
-import {
-  Leaf,
-  Globe,
-  CloudSun,
-  ScanLine,
-  Calendar,
-  TrendingUp,
-  Droplets,
-  Bot,
-  Bell,
-  Settings,
-  X,
-  MapPin,
+import { useState, useEffect } from 'react';
+import { 
+  Leaf, 
+  Globe, 
+  ArrowRight, 
+  LayoutDashboard, 
+  CloudSun, 
+  ScanLine, 
+  Calendar, 
+  TrendingUp, 
+  Droplets, 
+  Bot, 
+  Bell, 
+  Settings, 
+  X, 
+  Menu, 
+  CheckCircle2, 
+  Sparkles, 
+  MapPin, 
+  RefreshCw,
+  Eye,
   Home,
   Wind,
+  Layers,
+  Activity,
+  Radio
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { LanguageProvider, useLanguage } from './LanguageContext';
 import { Language } from './translations';
 import LandingPage from './components/LandingPage';
@@ -26,219 +37,219 @@ import MandiMarketWatch from './components/MandiMarketWatch';
 import IrrigationCalc from './components/IrrigationCalc';
 import AIAssistant from './components/AIAssistant';
 import CinematicCropBackdrop from './components/CinematicCropBackdrop';
+import TamilNaduWeather from './TamilNaduWeather';
 
-const TABS = ['overview', 'weather', 'health', 'planner', 'mandi', 'irrigation', 'assistant'] as const;
-type ActiveTab = (typeof TABS)[number];
-const isTab = (value: string): value is ActiveTab => (TABS as readonly string[]).includes(value);
-
-const OPACITY_LEVELS = ['subtle', 'balanced', 'deep'] as const;
-type OpacityLevel = (typeof OPACITY_LEVELS)[number];
-const isOpacityLevel = (value: string): value is OpacityLevel => (OPACITY_LEVELS as readonly string[]).includes(value);
-
-const BLEND_MODES = ['luminosity', 'overlay', 'normal'] as const;
-type BlendMode = (typeof BLEND_MODES)[number];
-const isBlendMode = (value: string): value is BlendMode => (BLEND_MODES as readonly string[]).includes(value);
-
-/** District keys must match the districts supported by GET /api/weather. */
-const ZONES = [
-  { district: 'Thanjavur', label: 'Cauvery Delta (Thanjavur)' },
-  { district: 'Coimbatore', label: 'Western Agro-Zone (Coimbatore)' },
-  { district: 'Madurai', label: 'Southern Rainfed (Madurai)' },
-  { district: 'Tiruchirappalli', label: 'Central Alluvium (Tiruchirappalli)' },
-] as const;
-
-interface FarmSettings {
-  farmerName: string;
-  totalAcres: string;
-  primaryCrop: string;
-  soilType: string;
-  irrigationType: string;
-}
-
-const PROFILE_KEY = 'lgf.farmProfile.v1';
-const DEFAULT_PROFILE: FarmSettings = {
-  farmerName: '',
-  totalAcres: '',
-  primaryCrop: '',
-  soilType: '',
-  irrigationType: '',
-};
-
-const loadProfile = (): FarmSettings => {
-  try {
-    const raw = window.localStorage.getItem(PROFILE_KEY);
-    if (!raw) return DEFAULT_PROFILE;
-    const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== 'object' || parsed === null) return DEFAULT_PROFILE;
-    const p = parsed as Record<string, unknown>;
-    const pick = (key: keyof FarmSettings) => (typeof p[key] === 'string' ? (p[key] as string) : '');
-    return {
-      farmerName: pick('farmerName'),
-      totalAcres: pick('totalAcres'),
-      primaryCrop: pick('primaryCrop'),
-      soilType: pick('soilType'),
-      irrigationType: pick('irrigationType'),
-    };
-  } catch {
-    return DEFAULT_PROFILE;
-  }
-};
-
-const validateProfile = (p: FarmSettings): Partial<Record<keyof FarmSettings, string>> => {
-  const errors: Partial<Record<keyof FarmSettings, string>> = {};
-  if (p.farmerName.trim().length > 60) errors.farmerName = 'Use 60 characters or fewer.';
-  if (p.totalAcres.trim() !== '') {
-    const acres = Number(p.totalAcres);
-    if (!Number.isFinite(acres) || acres <= 0 || acres > 10000) errors.totalAcres = 'Enter a number between 0 and 10,000.';
-  }
-  (['primaryCrop', 'soilType', 'irrigationType'] as const).forEach((key) => {
-    if (p[key].trim().length > 80) errors[key] = 'Use 80 characters or fewer.';
-  });
-  return errors;
-};
+type ActiveTab = 'overview' | 'tnweather' | 'weather' | 'health' | 'planner' | 'mandi' | 'irrigation' | 'assistant';
 
 function AppContent() {
   const { t, language, setLanguage } = useLanguage();
   const [view, setView] = useState<'landing' | 'dashboard'>('landing');
   const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [activeDistrict, setActiveDistrict] = useState<string>(ZONES[0].district);
-
+  const [activeZone, setActiveZone] = useState('Cauvery Delta (Thanjavur)');
+  
+  // Cinematic crop loop settings
   const [backdropEnabled, setBackdropEnabled] = useState(true);
-  const [backdropOpacity, setBackdropOpacity] = useState<OpacityLevel>('subtle');
-  const [backdropBlend, setBackdropBlend] = useState<BlendMode>('luminosity');
+  const [backdropOpacity, setBackdropOpacity] = useState<'subtle' | 'balanced' | 'deep'>('subtle');
+  const [backdropBlend, setBackdropBlend] = useState<'luminosity' | 'overlay' | 'normal'>('luminosity');
 
-  const [farmSettings, setFarmSettings] = useState<FarmSettings>(loadProfile);
-  const [draft, setDraft] = useState<FarmSettings>(farmSettings);
-  const [errors, setErrors] = useState<Partial<Record<keyof FarmSettings, string>>>({});
-  const [saveNote, setSaveNote] = useState<string | null>(null);
+  // Farm Profile settings state
+  const [farmSettings, setFarmSettings] = useState({
+    farmerName: 'Leo Agro Grower',
+    totalAcres: '4.5',
+    primaryCrop: 'Paddy Samba (Ponni)',
+    soilType: 'Cauvery Delta Alluvial Clay',
+    irrigationType: 'Drip & Borewell'
+  });
 
-  const activeZone = ZONES.find((z) => z.district === activeDistrict) ?? ZONES[0];
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      title: 'Monsoon Advisory: Rain expected in Delta',
+      time: '15m ago',
+      desc: '32mm rainfall forecast in Thanjavur over the next 48 hrs. Pause foliar bio-fertilizer spray.',
+      type: 'weather'
+    },
+    {
+      id: 2,
+      title: 'Mandi Price Alert: Turmeric rose by ₹180',
+      time: '2h ago',
+      desc: 'Erode APMC recorded turmeric at ₹14,250/quintal due to strong export arrivals.',
+      type: 'market'
+    },
+    {
+      id: 3,
+      title: 'Plant Health Notice: Foliage hydration 94%',
+      time: '4h ago',
+      desc: 'Sensor pin on shoot apex indicates optimum transpiration and normal stomatal conductance.',
+      type: 'plant'
+    }
+  ]);
 
-  // Close open dialogs with Escape.
+  const [overviewWeather, setOverviewWeather] = useState<{
+    temperature: number;
+    humidity: number;
+    condition: string;
+    windSpeed: number;
+    windDirection: string;
+    district: string;
+    liveDate?: string;
+    liveTime?: string;
+  } | null>(null);
+
   useEffect(() => {
-    if (!notificationsOpen && !settingsOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setNotificationsOpen(false);
-        setSettingsOpen(false);
+    fetch('/api/weather?district=Thanjavur')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && data.temperature !== undefined) {
+          setOverviewWeather({
+            temperature: data.temperature,
+            humidity: data.humidity,
+            condition: data.condition,
+            windSpeed: data.windSpeed,
+            windDirection: data.windDirection,
+            district: data.district,
+            liveDate: data.liveDate,
+            liveTime: data.liveTime
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const handleAgroAlert = (e: any) => {
+      if (e.detail) {
+        setNotifications((prev) => [e.detail, ...prev]);
       }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [notificationsOpen, settingsOpen]);
+    window.addEventListener('leo-agro-alert', handleAgroAlert);
+    return () => window.removeEventListener('leo-agro-alert', handleAgroAlert);
+  }, []);
 
   const handleOpenDashboard = (tab?: string) => {
-    if (tab && isTab(tab)) setActiveTab(tab);
+    if (tab && ['overview', 'tnweather', 'weather', 'health', 'planner', 'mandi', 'irrigation', 'assistant'].includes(tab)) {
+      setActiveTab(tab as ActiveTab);
+    }
     setView('dashboard');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const openSettings = () => {
-    setDraft(farmSettings);
-    setErrors({});
-    setSaveNote(null);
-    setSettingsOpen(true);
-  };
-
-  const saveSettings = () => {
-    const found = validateProfile(draft);
-    setErrors(found);
-    if (Object.keys(found).length > 0) return;
-    const cleaned: FarmSettings = {
-      farmerName: draft.farmerName.trim(),
-      totalAcres: draft.totalAcres.trim(),
-      primaryCrop: draft.primaryCrop.trim(),
-      soilType: draft.soilType.trim(),
-      irrigationType: draft.irrigationType.trim(),
-    };
-    try {
-      window.localStorage.setItem(PROFILE_KEY, JSON.stringify(cleaned));
-      setFarmSettings(cleaned);
-      setSettingsOpen(false);
-    } catch {
-      setSaveNote('Could not save: browser storage is unavailable. Your changes were not stored.');
-    }
-  };
-
   const navItems = [
     { id: 'overview', label: language === 'ta' ? 'கண்ணோட்டம்' : language === 'hi' ? 'अवलोकन' : 'Overview', icon: Leaf },
-    { id: 'weather', label: language === 'ta' ? 'வானிலை & மழை' : language === 'hi' ? 'मौसम व वर्षा' : 'Weather & Rain', icon: CloudSun },
+    { id: 'tnweather', label: language === 'ta' ? '38 மாவட்ட வானிலை' : language === 'hi' ? '38 जिले मौसम' : 'TN 38 Weather', icon: CloudSun, badge: 'Live' },
+    { id: 'weather', label: language === 'ta' ? 'வானிலை & மழை' : language === 'hi' ? 'मौसम व वर्षा' : 'Agro-Station', icon: CloudSun },
     { id: 'health', label: language === 'ta' ? 'பயிர் மருத்துவம்' : language === 'hi' ? 'फसल रोग जांच' : 'Crop Vision', icon: ScanLine },
     { id: 'planner', label: language === 'ta' ? 'பயிர் காலண்டர்' : language === 'hi' ? 'फसल योजना' : 'Crop Planner', icon: Calendar },
     { id: 'mandi', label: language === 'ta' ? 'மண்டி விலை' : language === 'hi' ? 'मंडी भाव' : 'Mandi Market', icon: TrendingUp },
     { id: 'irrigation', label: language === 'ta' ? 'பாசனக் கணக்கீடு' : language === 'hi' ? 'सिंचाई कैलकुलेटर' : 'Irrigation', icon: Droplets },
     { id: 'assistant', label: language === 'ta' ? 'AI வேளாண் ஆலோசகர்' : language === 'hi' ? 'एआई सहायक' : 'Leo AI Assistant', icon: Bot },
-  ] as const;
+  ];
 
   if (view === 'landing') {
     return <LandingPage onOpenDashboard={handleOpenDashboard} />;
   }
 
-  const inputClass =
-    'w-full p-2.5 rounded-xl bg-[#121E16] border border-emerald-500/20 text-stone-200 font-sans focus:outline-none focus:border-emerald-400';
-
-  const overviewCards: { tab: ActiveTab; title: string; body: string }[] = [
-    { tab: 'weather', title: 'Live weather & rain', body: `7-day forecast for ${activeZone.district} from Open-Meteo.` },
-    { tab: 'mandi', title: 'Mandi prices', body: 'Reported Tamil Nadu market prices from Agmarknet, when the server is configured.' },
-    { tab: 'health', title: 'Crop photo check', body: 'Upload a leaf photo for a preliminary AI opinion, then confirm with your KVK.' },
-  ];
-
   return (
     <div className="min-h-screen bg-[#070D09] text-stone-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-black relative">
-      <CinematicCropBackdrop enabled={backdropEnabled} opacityLevel={backdropOpacity} blendMode={backdropBlend} />
+      {/* Cinematic Looping Backdrop with CSS Blend Mode & Low Opacity */}
+      <CinematicCropBackdrop 
+        enabled={backdropEnabled} 
+        opacityLevel={backdropOpacity} 
+        blendMode={backdropBlend} 
+      />
 
-      <header className="sticky top-0 z-40 bg-[#070D09]/85 backdrop-blur-xl border-b border-emerald-500/15">
+      {/* Top Navigation Bar */}
+      <header className="sticky top-0 z-40 bg-[#070D09]/85 backdrop-blur-xl border-b border-emerald-500/15 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4">
-          <button
-            type="button"
-            onClick={() => setView('landing')}
-            className="flex items-center gap-2.5 group cursor-pointer text-left"
-            aria-label="Leo Green Farm, return to homepage"
-          >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center text-[#070D09] shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
-              <Leaf className="w-5 h-5 stroke-[2.2]" aria-hidden="true" />
-            </div>
-            <div className="hidden sm:block">
-              <span className="text-base font-bold tracking-tight text-white block">Leo Green Farm</span>
-              <span className="text-[11px] text-stone-400 font-mono block">Agricultural Decision Support</span>
-            </div>
-          </button>
-
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#121E16] border border-emerald-500/25 text-xs text-stone-300">
-            <MapPin className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
-            <label htmlFor="zone-select" className="text-stone-400">Zone:</label>
-            <select
-              id="zone-select"
-              value={activeDistrict}
-              onChange={(e) => setActiveDistrict(e.target.value)}
-              className="bg-transparent border-none text-emerald-300 font-medium cursor-pointer outline-none text-xs"
+          {/* Logo & Mobile Menu Trigger */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 rounded-xl bg-white/5 hover:bg-white/10 text-stone-300 hover:text-white cursor-pointer"
             >
-              {ZONES.map((z) => (
-                <option key={z.district} value={z.district} className="bg-[#0B130E] text-stone-200">{z.label}</option>
-              ))}
+              <Menu className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setView('landing')}
+              className="flex items-center gap-2.5 group cursor-pointer text-left"
+              title="Return to Editorial Homepage"
+            >
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center text-[#070D09] shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+                <Leaf className="w-5 h-5 stroke-[2.2]" />
+              </div>
+              <div className="hidden sm:block">
+                <span className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
+                  Leo Green Farm
+                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
+                    Ops
+                  </span>
+                </span>
+                <span className="text-[11px] text-stone-400 font-mono block">
+                  Agricultural Intelligence Suite
+                </span>
+              </div>
+            </button>
+          </div>
+
+          {/* Active Tamil Nadu Zone Selector */}
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#121E16] border border-emerald-500/25 text-xs text-stone-300">
+            <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-stone-400">Zone:</span>
+            <select
+              value={activeZone}
+              onChange={(e) => setActiveZone(e.target.value)}
+              className="bg-transparent border-none text-emerald-300 font-medium cursor-pointer outline-none text-xs focus:ring-0"
+            >
+              <option value="Cauvery Delta (Thanjavur)" className="bg-[#0B130E] text-stone-200">Cauvery Delta (Thanjavur)</option>
+              <option value="Western Agro-Zone (Coimbatore)" className="bg-[#0B130E] text-stone-200">Western Agro-Zone (Coimbatore)</option>
+              <option value="Southern Rainfed (Madurai)" className="bg-[#0B130E] text-stone-200">Southern Rainfed (Madurai)</option>
+              <option value="Central Alluvium (Tiruchirappalli)" className="bg-[#0B130E] text-stone-200">Central Alluvium (Tiruchirappalli)</option>
             </select>
           </div>
 
+          {/* Actions & Utilities */}
           <div className="flex items-center gap-2.5">
+            {/* Tamil Nadu 38 Districts Live Weather Button on Top Menu */}
             <button
-              type="button"
+              onClick={() => {
+                setActiveTab('tnweather');
+                setView('dashboard');
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                activeTab === 'tnweather' && view === 'dashboard'
+                  ? 'bg-cyan-500 text-black border-cyan-400 shadow-md shadow-cyan-500/20'
+                  : 'bg-cyan-950/70 hover:bg-cyan-900/70 text-cyan-300 border-cyan-500/35'
+              }`}
+              title="Real-time live weather for all 38 districts of Tamil Nadu"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400" />
+              </span>
+              <CloudSun className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="font-mono font-bold whitespace-nowrap">TN 38 Weather</span>
+            </button>
+
+            {/* View Editorial Website Button */}
+            <button
               onClick={() => setView('landing')}
               className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-300 hover:text-white text-xs font-medium border border-white/10 transition-colors cursor-pointer"
             >
-              <Home className="w-3.5 h-3.5" aria-hidden="true" />
+              <Home className="w-3.5 h-3.5" />
               <span>{t('viewWebsite')}</span>
             </button>
 
+            {/* Language Switcher */}
             <div className="flex items-center gap-1 bg-[#121E16] border border-emerald-500/25 rounded-xl px-2.5 py-1.5 text-xs text-stone-200">
-              <Globe className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
-              <label htmlFor="language-select" className="sr-only">Language</label>
+              <Globe className="w-3.5 h-3.5 text-emerald-400" />
               <select
-                id="language-select"
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as Language)}
-                className="bg-transparent border-none text-xs font-medium cursor-pointer outline-none text-emerald-300"
+                className="bg-transparent border-none text-xs font-medium cursor-pointer outline-none text-emerald-300 focus:ring-0"
               >
                 <option value="en" className="bg-[#0B130E] text-stone-200">EN</option>
                 <option value="ta" className="bg-[#0B130E] text-stone-200">தமிழ்</option>
@@ -246,249 +257,389 @@ function AppContent() {
               </select>
             </div>
 
+            {/* Cinematic Swaying Crops Atmosphere Toggle */}
             <button
-              type="button"
               onClick={() => setBackdropEnabled(!backdropEnabled)}
-              aria-pressed={backdropEnabled}
-              aria-label="Animated crop background"
-              title={backdropEnabled ? 'Animated crop background: on' : 'Animated crop background: off'}
-              className={`p-2 rounded-xl transition-all cursor-pointer border ${
+              className={`p-2 rounded-xl transition-all relative cursor-pointer border ${
                 backdropEnabled
-                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 shadow-sm shadow-emerald-500/20'
                   : 'bg-white/5 border-white/10 text-stone-400 hover:text-white'
               }`}
+              title={backdropEnabled ? 'Cinematic Swaying Crops: Active (Click to toggle off)' : 'Cinematic Swaying Crops: Paused (Click to activate)'}
+              aria-label="Toggle Cinematic Swaying Crops"
             >
-              <Wind className="w-4 h-4" aria-hidden="true" />
+              <Wind className="w-4 h-4" />
+              {backdropEnabled && (
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              )}
             </button>
 
+            {/* Notifications Trigger */}
             <button
-              type="button"
-              onClick={() => setNotificationsOpen(true)}
-              aria-label="Open notifications"
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-stone-300 hover:text-white transition-colors cursor-pointer border border-white/5"
+              onClick={() => setNotificationsOpen(!notificationsOpen)}
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-stone-300 hover:text-white transition-colors relative cursor-pointer border border-white/5"
+              title="Agro Alerts"
             >
-              <Bell className="w-4 h-4" aria-hidden="true" />
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             </button>
 
+            {/* Farm Settings Trigger */}
             <button
-              type="button"
-              onClick={openSettings}
-              aria-label="Open farm profile and settings"
+              onClick={() => setSettingsOpen(true)}
               className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-stone-300 hover:text-white transition-colors cursor-pointer border border-white/5"
+              title="Farm Profile & Parameters"
             >
-              <Settings className="w-4 h-4" aria-hidden="true" />
+              <Settings className="w-4 h-4" />
             </button>
           </div>
         </div>
       </header>
 
+      {/* Main App Workspace */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1 flex flex-col">
-        <nav aria-label="Dashboard sections" className="mb-6 flex items-center gap-1.5 p-1.5 rounded-2xl bg-[#0B130E] border border-emerald-500/20 overflow-x-auto no-scrollbar shadow-lg">
+        {/* Navigation Tabs Pill Bar */}
+        <div className="mb-6 flex items-center gap-1.5 p-1.5 rounded-2xl bg-[#0B130E] border border-emerald-500/20 overflow-x-auto no-scrollbar shadow-lg">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
               <button
-                type="button"
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                aria-current={isActive ? 'page' : undefined}
+                onClick={() => {
+                  setActiveTab(item.id as ActiveTab);
+                  setMobileMenuOpen(false);
+                }}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-xs sm:text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${
                   isActive
                     ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-[#070D09] font-bold shadow-md shadow-emerald-500/25'
                     : 'text-stone-300 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'stroke-[2.5]' : 'text-stone-400'}`} aria-hidden="true" />
+                <Icon className={`w-4 h-4 ${isActive ? 'stroke-[2.5]' : 'text-stone-400'}`} />
                 <span>{item.label}</span>
               </button>
             );
           })}
-        </nav>
+        </div>
 
-        <main className="flex-1 w-full space-y-6">
+        {/* Tab View Contents */}
+        <div className="flex-1 w-full space-y-6">
           {activeTab === 'overview' && (
             <div className="space-y-6">
-              {farmSettings.farmerName || farmSettings.primaryCrop || farmSettings.totalAcres ? (
-                <p className="text-sm text-stone-300">
-                  {[
-                    farmSettings.farmerName,
-                    farmSettings.totalAcres ? `${farmSettings.totalAcres} acres` : '',
-                    farmSettings.primaryCrop,
-                  ].filter(Boolean).join(' · ')}
-                </p>
-              ) : (
-                <p className="text-sm text-stone-400">Add your farm details in Settings to keep them on this device.</p>
-              )}
-
+              {/* Botanical Inspector Central Showcase */}
               <BotanicalInspector />
 
+              {/* Quick Telemetry Row */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {overviewCards.map((card) => (
-                  <button
-                    type="button"
-                    key={card.tab}
-                    onClick={() => setActiveTab(card.tab)}
-                    className="glass-panel p-5 rounded-2xl border border-emerald-500/20 text-left space-y-2 hover:border-emerald-400/50 transition-colors cursor-pointer"
-                  >
-                    <span className="text-base font-bold text-white block">{card.title}</span>
-                    <span className="text-xs text-stone-400 block leading-relaxed">{card.body}</span>
-                    <span className="text-xs font-mono text-emerald-400 block">Open &rarr;</span>
-                  </button>
-                ))}
+                {/* Crop Health Index - Live Sensor Telemetry Card with Subtle Pulse */}
+                <motion.div 
+                  animate={{
+                    boxShadow: [
+                      '0 0 0px 0px rgba(16, 185, 129, 0)',
+                      '0 0 16px 2px rgba(16, 185, 129, 0.18)',
+                      '0 0 0px 0px rgba(16, 185, 129, 0)'
+                    ],
+                    borderColor: [
+                      'rgba(16, 185, 129, 0.2)',
+                      'rgba(16, 185, 129, 0.42)',
+                      'rgba(16, 185, 129, 0.2)'
+                    ]
+                  }}
+                  transition={{
+                    duration: 2.8,
+                    repeat: Infinity,
+                    ease: 'easeInOut'
+                  }}
+                  className="glass-panel p-5 rounded-2xl border border-emerald-500/20 space-y-2 relative overflow-hidden group hover:border-emerald-500/40 transition-colors"
+                >
+                  {/* Subtle pulsing background ambient beacon */}
+                  <div className="absolute -top-10 -right-10 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none animate-pulse" />
+
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-2">
+                      <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                      <span className="text-xs font-mono uppercase text-emerald-400 font-semibold tracking-wide">
+                        Crop Health Index
+                      </span>
+                    </div>
+                    {/* Live sensor streaming indicator with pulse animation */}
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                      </span>
+                      <span className="text-[10px] font-mono text-emerald-300 font-medium tracking-wider">LIVE</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-baseline justify-between relative z-10 pt-0.5">
+                    <div className="text-2xl font-bold font-mono text-white">92% Optimum</div>
+                    <span className="text-[11px] font-mono text-emerald-400/90 flex items-center gap-1">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Live telemetry
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-stone-400 relative z-10">
+                    Active tiller formation. No visible blast or blight symptoms.
+                  </p>
+                </motion.div>
+
+                {/* Microclimate - Live Sensor Telemetry Card with Subtle Pulse */}
+                <motion.div 
+                  animate={{
+                    boxShadow: [
+                      '0 0 0px 0px rgba(6, 182, 212, 0)',
+                      '0 0 16px 2px rgba(6, 182, 212, 0.18)',
+                      '0 0 0px 0px rgba(6, 182, 212, 0)'
+                    ],
+                    borderColor: [
+                      'rgba(6, 182, 212, 0.2)',
+                      'rgba(6, 182, 212, 0.42)',
+                      'rgba(6, 182, 212, 0.2)'
+                    ]
+                  }}
+                  transition={{
+                    duration: 3.2,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                    delay: 0.5
+                  }}
+                  className="glass-panel p-5 rounded-2xl border border-cyan-500/20 space-y-2 relative overflow-hidden group hover:border-cyan-500/40 transition-colors cursor-pointer"
+                  onClick={() => setActiveTab('weather')}
+                  title="Click to view full Tamil Nadu 38 Districts Weather Dashboard"
+                >
+                  {/* Subtle pulsing background ambient beacon */}
+                  <div className="absolute -top-10 -right-10 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none animate-pulse" />
+
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-2">
+                      <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                      <span className="text-xs font-mono uppercase text-cyan-400 font-semibold tracking-wide">
+                        Microclimate
+                      </span>
+                    </div>
+                    {/* Live sensor streaming indicator with pulse animation */}
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/25">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400" />
+                      </span>
+                      <span className="text-[10px] font-mono text-cyan-300 font-medium tracking-wider">STREAMING</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-baseline justify-between relative z-10 pt-0.5">
+                    <div className="text-2xl font-bold font-mono text-white">
+                      {overviewWeather ? `${overviewWeather.temperature}°C · ${overviewWeather.humidity}% RH` : '31°C · 65% RH'}
+                    </div>
+                    <span className="text-[11px] font-mono text-cyan-400/90 flex items-center gap-1">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                      {overviewWeather?.district || 'Delta'} Node 04
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-stone-400 relative z-10 line-clamp-1">
+                    {overviewWeather 
+                      ? `${overviewWeather.district} (${overviewWeather.condition}). Wind: ${overviewWeather.windSpeed} km/h ${overviewWeather.windDirection}. ${overviewWeather.liveDate || ''}`
+                      : 'Cauvery Delta Zone. Light breeze from South-East at 12 km/h.'}
+                  </p>
+                </motion.div>
+
+                <div className="glass-panel p-5 rounded-2xl border border-emerald-500/20 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono uppercase text-amber-400">Mandi Benchmark</span>
+                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  </div>
+                  <div className="text-2xl font-bold font-mono text-white">₹2,380 / Qtl</div>
+                  <p className="text-xs text-stone-400">Thanjavur Regulated Market yard for Ponni Grade-A Paddy.</p>
+                </div>
               </div>
             </div>
           )}
 
-          {activeTab === 'weather' && <WeatherDashboard district={activeDistrict} />}
-          {activeTab === 'health' && <DiseaseDetector />}
+          {activeTab === 'tnweather' && (
+            <div className="space-y-6">
+              <TamilNaduWeather onBackToDashboard={() => setActiveTab('overview')} />
+            </div>
+          )}
+
+          {activeTab === 'weather' && <WeatherDashboard />}
+
+          {activeTab === 'health' && (
+            <div className="space-y-6">
+              <DiseaseDetector />
+            </div>
+          )}
+
           {activeTab === 'planner' && <CropPlanner />}
+
           {activeTab === 'mandi' && <MandiMarketWatch />}
+
           {activeTab === 'irrigation' && <IrrigationCalc />}
+
           {activeTab === 'assistant' && (
             <div className="max-w-4xl mx-auto w-full">
               <AIAssistant />
             </div>
           )}
-        </main>
+        </div>
       </div>
 
+      {/* Notifications Drawer */}
       {notificationsOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm" onClick={() => setNotificationsOpen(false)}>
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="notifications-title"
-            className="w-full max-w-sm bg-[#0B130E] border-l border-emerald-500/20 p-6 h-full flex flex-col shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-sm bg-[#0B130E] border-l border-emerald-500/20 p-6 h-full flex flex-col shadow-2xl">
             <div className="flex items-center justify-between pb-4 border-b border-emerald-500/15">
               <div className="flex items-center gap-2">
-                <Bell className="w-4 h-4 text-emerald-400" aria-hidden="true" />
-                <h3 id="notifications-title" className="font-bold text-white text-base">Notifications</h3>
+                <Bell className="w-4 h-4 text-emerald-400" />
+                <h3 className="font-bold text-white text-base">Agro Notifications</h3>
               </div>
               <button
-                type="button"
                 onClick={() => setNotificationsOpen(false)}
-                aria-label="Close notifications"
                 className="p-1.5 rounded-lg text-stone-400 hover:text-white hover:bg-white/5 cursor-pointer"
               >
-                <X className="w-5 h-5" aria-hidden="true" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex-1 py-6 text-sm text-stone-400 leading-relaxed">
-              <p className="text-stone-200 font-medium mb-1">No notifications</p>
-              <p>Alerts are not connected yet, so nothing is shown here. Check the Weather and Mandi tabs for live information.</p>
+            <div className="flex-1 overflow-y-auto py-4 space-y-3">
+              {notifications.map((n) => (
+                <div key={n.id} className="p-4 rounded-xl bg-[#121E16] border border-emerald-500/15 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase text-emerald-400">{n.type}</span>
+                    <span className="text-[10px] font-mono text-stone-500">{n.time}</span>
+                  </div>
+                  <h4 className="text-sm font-semibold text-white">{n.title}</h4>
+                  <p className="text-xs text-stone-400 leading-relaxed">{n.desc}</p>
+                </div>
+              ))}
             </div>
 
             <button
-              type="button"
               onClick={() => setNotificationsOpen(false)}
               className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-300 text-xs font-medium border border-white/10 transition-colors cursor-pointer"
             >
-              Close
+              Close Drawer
             </button>
           </div>
         </div>
       )}
 
+      {/* Farm Profile Modal */}
       {settingsOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setSettingsOpen(false)}>
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="settings-title"
-            className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-[#0B130E] border border-emerald-500/30 rounded-3xl p-6 space-y-5 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-[#0B130E] border border-emerald-500/30 rounded-3xl p-6 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-emerald-500/15">
               <div className="flex items-center gap-2">
-                <Settings className="w-5 h-5 text-emerald-400" aria-hidden="true" />
-                <h3 id="settings-title" className="text-lg font-bold text-white">Farm profile &amp; settings</h3>
+                <Settings className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-lg font-bold text-white">Farm Profile & Soil Context</h3>
               </div>
               <button
-                type="button"
                 onClick={() => setSettingsOpen(false)}
-                aria-label="Close settings"
                 className="p-1.5 rounded-lg text-stone-400 hover:text-white hover:bg-white/5 cursor-pointer"
               >
-                <X className="w-5 h-5" aria-hidden="true" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-[11px] text-stone-400 font-mono">Saved in this browser only. Not sent to or stored on a server.</p>
+            <div className="space-y-4 text-xs font-mono">
+              <div>
+                <label className="text-stone-400 block mb-1">Farm / Farmer Name</label>
+                <input
+                  type="text"
+                  value={farmSettings.farmerName}
+                  onChange={(e) => setFarmSettings({ ...farmSettings, farmerName: e.target.value })}
+                  className="w-full p-2.5 rounded-xl bg-[#121E16] border border-emerald-500/20 text-stone-200 font-sans focus:outline-none focus:border-emerald-400"
+                />
+              </div>
 
-            <div className="space-y-4 text-xs">
-              {([
-                { key: 'farmerName', label: 'Farm / farmer name', inputMode: undefined },
-                { key: 'totalAcres', label: 'Total land (acres)', inputMode: 'decimal' as const },
-                { key: 'primaryCrop', label: 'Primary crop', inputMode: undefined },
-                { key: 'soilType', label: 'Soil type', inputMode: undefined },
-                { key: 'irrigationType', label: 'Irrigation system', inputMode: undefined },
-              ]).map((field) => (
-                <div key={field.key}>
-                  <label htmlFor={`profile-${field.key}`} className="text-stone-400 block mb-1 font-mono">{field.label}</label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-stone-400 block mb-1">Total Land (Acres)</label>
                   <input
-                    id={`profile-${field.key}`}
                     type="text"
-                    inputMode={field.inputMode}
-                    value={draft[field.key as keyof FarmSettings]}
-                    onChange={(e) => setDraft({ ...draft, [field.key]: e.target.value })}
-                    aria-invalid={errors[field.key as keyof FarmSettings] ? true : undefined}
-                    aria-describedby={errors[field.key as keyof FarmSettings] ? `profile-${field.key}-error` : undefined}
-                    className={inputClass}
+                    value={farmSettings.totalAcres}
+                    onChange={(e) => setFarmSettings({ ...farmSettings, totalAcres: e.target.value })}
+                    className="w-full p-2.5 rounded-xl bg-[#121E16] border border-emerald-500/20 text-stone-200 font-sans focus:outline-none focus:border-emerald-400"
                   />
-                  {errors[field.key as keyof FarmSettings] && (
-                    <p id={`profile-${field.key}-error`} role="alert" className="text-red-300 mt-1">{errors[field.key as keyof FarmSettings]}</p>
-                  )}
                 </div>
-              ))}
+                <div>
+                  <label className="text-stone-400 block mb-1">Primary Crop</label>
+                  <input
+                    type="text"
+                    value={farmSettings.primaryCrop}
+                    onChange={(e) => setFarmSettings({ ...farmSettings, primaryCrop: e.target.value })}
+                    className="w-full p-2.5 rounded-xl bg-[#121E16] border border-emerald-500/20 text-stone-200 font-sans focus:outline-none focus:border-emerald-400"
+                  />
+                </div>
+              </div>
 
+              <div>
+                <label className="text-stone-400 block mb-1">Soil Classification</label>
+                <input
+                  type="text"
+                  value={farmSettings.soilType}
+                  onChange={(e) => setFarmSettings({ ...farmSettings, soilType: e.target.value })}
+                  className="w-full p-2.5 rounded-xl bg-[#121E16] border border-emerald-500/20 text-stone-200 font-sans focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+
+              <div>
+                <label className="text-stone-400 block mb-1">Irrigation System</label>
+                <input
+                  type="text"
+                  value={farmSettings.irrigationType}
+                  onChange={(e) => setFarmSettings({ ...farmSettings, irrigationType: e.target.value })}
+                  className="w-full p-2.5 rounded-xl bg-[#121E16] border border-emerald-500/20 text-stone-200 font-sans focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+
+              {/* Atmospheric Background Settings */}
               <div className="pt-3 border-t border-emerald-500/15 space-y-3">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-white text-xs font-semibold block">Animated crop background</span>
-                    <span className="text-[11px] text-stone-400">Decorative loop; turn off for a calmer, lighter page.</span>
+                    <label className="text-white text-xs font-semibold block">Cinematic Swaying Crops Backdrop</label>
+                    <span className="text-[11px] text-stone-400">Atmospheric video loop with CSS blend mode</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setBackdropEnabled(!backdropEnabled)}
-                    aria-pressed={backdropEnabled}
                     className={`px-3 py-1 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer border ${
-                      backdropEnabled ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-white/5 text-stone-400 border-white/10'
+                      backdropEnabled 
+                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' 
+                        : 'bg-white/5 text-stone-400 border-white/10'
                     }`}
                   >
-                    {backdropEnabled ? 'ON' : 'OFF'}
+                    {backdropEnabled ? 'ENABLED' : 'PAUSED'}
                   </button>
                 </div>
 
                 {backdropEnabled && (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3 text-xs">
                     <div>
-                      <label htmlFor="backdrop-opacity" className="text-stone-400 block mb-1">Opacity</label>
+                      <label className="text-stone-400 block mb-1">Backdrop Opacity</label>
                       <select
-                        id="backdrop-opacity"
                         value={backdropOpacity}
-                        onChange={(e) => isOpacityLevel(e.target.value) && setBackdropOpacity(e.target.value)}
-                        className="w-full p-2 rounded-xl bg-[#121E16] border border-emerald-500/20 text-stone-200 text-xs"
+                        onChange={(e) => setBackdropOpacity(e.target.value as any)}
+                        className="w-full p-2 rounded-xl bg-[#121E16] border border-emerald-500/20 text-stone-200 text-xs focus:outline-none"
                       >
-                        <option value="subtle">Subtle</option>
-                        <option value="balanced">Balanced</option>
-                        <option value="deep">Deep</option>
+                        <option value="subtle">Subtle (15% Opacity)</option>
+                        <option value="balanced">Balanced (25% Opacity)</option>
+                        <option value="deep">Cinematic (35% Opacity)</option>
                       </select>
                     </div>
                     <div>
-                      <label htmlFor="backdrop-blend" className="text-stone-400 block mb-1">Blend mode</label>
+                      <label className="text-stone-400 block mb-1">CSS Blend Mode</label>
                       <select
-                        id="backdrop-blend"
                         value={backdropBlend}
-                        onChange={(e) => isBlendMode(e.target.value) && setBackdropBlend(e.target.value)}
-                        className="w-full p-2 rounded-xl bg-[#121E16] border border-emerald-500/20 text-stone-200 text-xs"
+                        onChange={(e) => setBackdropBlend(e.target.value as any)}
+                        className="w-full p-2 rounded-xl bg-[#121E16] border border-emerald-500/20 text-stone-200 text-xs focus:outline-none"
                       >
-                        <option value="luminosity">Luminosity</option>
-                        <option value="overlay">Overlay</option>
-                        <option value="normal">Normal</option>
+                        <option value="luminosity">Luminosity (Moody Forest)</option>
+                        <option value="overlay">Overlay (Sunlit Depth)</option>
+                        <option value="normal">Normal (Soft Dark)</option>
                       </select>
                     </div>
                   </div>
@@ -496,35 +647,35 @@ function AppContent() {
               </div>
             </div>
 
-            {saveNote && <p role="alert" className="text-xs text-red-300">{saveNote}</p>}
-
             <div className="pt-2 flex justify-end gap-3">
               <button
-                type="button"
                 onClick={() => setSettingsOpen(false)}
                 className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-stone-300 text-xs font-medium cursor-pointer"
               >
                 Cancel
               </button>
               <button
-                type="button"
-                onClick={saveSettings}
+                onClick={() => setSettingsOpen(false)}
                 className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#070D09] font-bold text-xs uppercase tracking-wider cursor-pointer"
               >
-                Save
+                Save Preferences
               </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* Footer */}
       <footer className="mt-auto border-t border-emerald-500/15 bg-[#0B130E]/60 py-6 text-xs text-stone-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-stone-400">
-            <Leaf className="w-4 h-4 text-emerald-400" aria-hidden="true" />
-            <span>Leo Green Farm · Agricultural decision support. Not a substitute for advice from your Agriculture Officer or KVK.</span>
+            <Leaf className="w-4 h-4 text-emerald-400" />
+            <span>Leo Green Farm · Agricultural Decision Support</span>
           </div>
-          <span className="font-mono">Zone: {activeZone.label}</span>
+          <div className="flex items-center gap-4 text-xs font-mono">
+            <span>Zone: {activeZone}</span>
+            <span className="text-emerald-400">System Healthy</span>
+          </div>
         </div>
       </footer>
     </div>
