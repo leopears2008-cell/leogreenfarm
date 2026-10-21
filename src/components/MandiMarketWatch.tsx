@@ -38,6 +38,8 @@ interface MarketPrice {
 export default function MandiMarketWatch() {
   const { t, language } = useLanguage();
   const [prices, setPrices] = useState<MarketPrice[]>([]);
+  const [isDemo, setIsDemo] = useState(false);
+  const [disclaimer, setDisclaimer] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState('All');
@@ -50,7 +52,9 @@ export default function MandiMarketWatch() {
       const res = await fetch('/api/market-prices');
       if (res.ok) {
         const data = await res.json();
-        setPrices(data);
+        setPrices(Array.isArray(data) ? data : (data.prices ?? []));
+        setIsDemo(Boolean(data.demo));
+        setDisclaimer(typeof data.disclaimer === 'string' ? data.disclaimer : '');
       }
     } catch (err) {
       console.error('Failed to fetch mandi prices:', err);
@@ -129,6 +133,12 @@ export default function MandiMarketWatch() {
           <span>Refresh Rates</span>
         </button>
       </div>
+
+      {isDemo && (
+        <div role="status" className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
+          <strong className="font-semibold">Demo data.</strong> {disclaimer || 'These are not live mandi prices. Verify on Agmarknet before trading.'}
+        </div>
+      )}
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -233,7 +243,7 @@ export default function MandiMarketWatch() {
                     <Truck className="w-3.5 h-3.5 text-emerald-400" />
                     {t('arrival')}:
                   </span>
-                  <span className="text-white font-semibold">{item.arrivalTons} Tons Today</span>
+                  <span className="text-white font-semibold">{item.arrivalTons} Tons{isDemo ? ' (sample)' : ' Today'}</span>
                 </div>
 
                 <div className="flex items-center justify-between text-[11px] text-stone-500">
@@ -241,7 +251,7 @@ export default function MandiMarketWatch() {
                     <Calendar className="w-3 h-3" />
                     {item.date}
                   </span>
-                  <span className="text-emerald-500/80 truncate max-w-[150px]">{item.source}</span>
+                  <span className="text-emerald-500/80 truncate max-w-[150px]">{isDemo ? 'Sample data' : item.source}</span>
                 </div>
               </div>
             </div>
@@ -253,7 +263,15 @@ export default function MandiMarketWatch() {
       <div className="p-4 rounded-2xl bg-[#0F1E15] border border-emerald-500/20 flex items-center gap-3 text-xs text-stone-300">
         <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
         <p className="leading-relaxed">
-          <strong className="text-white font-semibold">TNAU Agmarknet Insight:</strong> Prices reflect authorized daily APMC gate transactions across Tamil Nadu. Farmers are advised to clean and grade produce to obtain top modal rates.
+          {isDemo ? (
+            <>
+              <strong className="text-white font-semibold">Tip:</strong> Always check today's rate on Agmarknet or at your local APMC yard before selling. Clean and grade produce to obtain top modal rates.
+            </>
+          ) : (
+            <>
+              <strong className="text-white font-semibold">TNAU Agmarknet Insight:</strong> Prices reflect authorized daily APMC gate transactions across Tamil Nadu. Farmers are advised to clean and grade produce to obtain top modal rates.
+            </>
+          )}
         </p>
       </div>
     </div>
